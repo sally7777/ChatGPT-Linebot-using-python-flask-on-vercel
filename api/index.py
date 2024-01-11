@@ -8,6 +8,7 @@ import os
 
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 line_handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
+###設定機器人是否啟用
 working_status = os.getenv("DEFALUT_TALKING", default = "true").lower() == "true"
 
 app = Flask(__name__)
@@ -38,21 +39,18 @@ def handle_message(event):
     global working_status
     if event.message.type != "text":
         return
-
-    if event.message.text == "說話":
+    if event.message.text == "詢問":
         working_status = True
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="我可以說話囉，歡迎來跟我互動 ^_^ "))
+            TextSendMessage(text="哈囉~ 今天您好要詢問哪方面的問題呢?"))
         return
-
-    if event.message.text == "閉嘴":
+    if event.message.text == "結束":
         working_status = False
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="好的，我乖乖閉嘴 > <，如果想要我繼續說話，請跟我說 「說話」 > <"))
+            TextSendMessage(text="好的~感謝你今天的諮詢，如果有其他需求，再請向我「詢問」 > <"))
         return
-
     if working_status:
         chatgpt.add_msg(f"HUMAN:{event.message.text}?\n")
         reply_msg = chatgpt.get_response().replace("AI:", "", 1)
